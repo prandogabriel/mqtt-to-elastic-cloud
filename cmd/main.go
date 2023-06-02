@@ -16,18 +16,16 @@ func main() {
 	topic := os.Getenv("MQTT_TOPIC")
 	cloudID := os.Getenv("ELASTIC_CLOUD_ID")
 	apiKey := os.Getenv("ELASTIC_API_KEY")
+	indexName := os.Getenv("ELASTIC_INDEX_NAME")
 
 	// Verificando se as variáveis de ambiente estão definidas
-	if broker == "" || topic == "" || cloudID == "" || apiKey == "" {
-		fmt.Println("Error: environment variables MQTT_BROKER, MQTT_TOPIC, ELASTIC_CLOUD_ID and ELASTIC_API_KEY must be set")
+	if broker == "" || topic == "" || cloudID == "" || apiKey == "" || indexName == "" {
+		fmt.Println("Error: environment variables MQTT_BROKER, MQTT_TOPIC, ELASTIC_CLOUD_ID, ELASTIC_INDEX_NAME and ELASTIC_API_KEY must be set")
 		os.Exit(1)
 	}
 
 	// Parte 1: Ouvindo um tópico MQTT em Go
 	c := clients.NewMQTTClient(broker)
-
-	fmt.Println("cloudID -> ", cloudID)
-	fmt.Println("apiKey -> ", apiKey)
 
 	// Parte 2: Conectando com Elastic Cloud
 	es := clients.NewElasticClient(cloudID, apiKey)
@@ -36,10 +34,10 @@ func main() {
 		fmt.Printf("MSG: %s\n", msg.Payload())
 
 		// Enviando dados para Elastic Cloud
-		result, err := es.Index("search-data",
+		result, err := es.Index(indexName,
 			strings.NewReader(`{"message": "`+string(msg.Payload())+`"}`))
 
-		fmt.Printf("Pub to elastic status: %s\n", result.Status())
+		fmt.Printf("Pub to elastic status: %s %s\n", result.Status(), result.String())
 
 		if err != nil {
 			// Handle error
