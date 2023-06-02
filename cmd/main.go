@@ -33,8 +33,10 @@ func main() {
 		fmt.Printf("MSG: %s\n", msg.Payload())
 
 		// Enviando dados para Elastic Cloud
-		_, err := es.Index("search-data",
+		result, err := es.Index("search-data",
 			strings.NewReader(`{"message": "`+string(msg.Payload())+`"}`))
+
+		fmt.Printf("Pub to elastic status: %s\n", result.Status())
 
 		if err != nil {
 			// Handle error
