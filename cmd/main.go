@@ -26,6 +26,9 @@ func main() {
 	// Parte 1: Ouvindo um tópico MQTT em Go
 	c := clients.NewMQTTClient(broker)
 
+	fmt.Println("cloudID -> ", cloudID)
+	fmt.Println("apiKey -> ", apiKey)
+
 	// Parte 2: Conectando com Elastic Cloud
 	es := clients.NewElasticClient(cloudID, apiKey)
 
