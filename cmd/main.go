@@ -31,11 +31,13 @@ func main() {
 	es := clients.NewElasticClient(cloudID, apiKey)
 
 	clients.Subscribe(c, topic, func(client MQTT.Client, msg MQTT.Message) {
-		fmt.Println(`{"message": ` + string(msg.Payload()) + `}`)
+		message := `{"message": ` + string(msg.Payload()) + `}`
+
+		fmt.Println(message)
 
 		// Enviando dados para Elastic Cloud
 		result, err := es.Index(indexName,
-			strings.NewReader(`{"message": "`+string(msg.Payload())+`"}`))
+			strings.NewReader(message))
 
 		fmt.Printf("Pub to elastic status: %s %s\n", result.Status(), result.String())
 
