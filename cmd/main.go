@@ -45,7 +45,7 @@ func main() {
 		}
 
 		// Add the UUID and date to the message
-		message["uuid"] = uuid
+		message["id"] = uuid
 		message["date"] = date
 
 		// Convert the message back to JSON
