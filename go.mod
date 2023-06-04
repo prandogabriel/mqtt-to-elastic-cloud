@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/eclipse/paho.mqtt.golang v1.4.2
 	github.com/elastic/go-elasticsearch/v8 v8.8.0
+	github.com/google/uuid v1.3.0
 )
 
 require (

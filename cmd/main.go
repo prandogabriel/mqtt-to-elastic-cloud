@@ -3,11 +3,14 @@ package main
 
 import (
 	clients "bridge/pkg"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	MQTT "github.com/eclipse/paho.mqtt.golang"
+	"github.com/google/uuid"
 )
 
 func main() {
@@ -31,20 +34,35 @@ func main() {
 	es := clients.NewElasticClient(cloudID, apiKey)
 
 	clients.Subscribe(c, topic, func(client MQTT.Client, msg MQTT.Message) {
-		message := `{"message": ` + string(msg.Payload()) + `}`
+		uuid := uuid.New().String()             // generate a new UUID
+		date := time.Now().Format(time.RFC3339) // get the current date in RFC3339 format
 
-		fmt.Println(message)
-
-		// Enviando dados para Elastic Cloud
-		result, err := es.Index(indexName,
-			strings.NewReader(message))
-
-		fmt.Printf("Pub to elastic status: %s %s\n", result.Status(), result.String())
-
+		// Parse the received message into a map structure
+		var message map[string]interface{}
+		err := json.Unmarshal(msg.Payload(), &message)
 		if err != nil {
-			// Handle error
 			panic(err)
 		}
+
+		// Add the UUID and date to the message
+		message["uuid"] = uuid
+		message["date"] = date
+
+		// Convert the message back to JSON
+		jsonMessage, err := json.Marshal(message)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Println(string(jsonMessage))
+
+		// Index the message into Elasticsearch
+		result, err := es.Index(indexName, strings.NewReader(string(jsonMessage)))
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("Pub to elastic status: %s %s\n", result.Status(), result.String())
 	})
 
 	for {
